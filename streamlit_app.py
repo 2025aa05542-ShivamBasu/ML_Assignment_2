@@ -503,7 +503,7 @@ elif page == "Model Validation":
             comparison_df = pd.DataFrame(comparison_data)
             
             st.subheader("📊 Model Comparison Table:")
-            st.dataframe(comparison_df, use_container_width=True)
+            st.dataframe(comparison_df, width='stretch')
             
             # Extract numeric values for plotting
             accuracy_scores = {name: float(results[name]['accuracy']) for name in results}
