@@ -31,8 +31,8 @@ class LogisticRegressionModel:
 
     def train(self, X, y, **kwargs) -> LogisticRegression:
         """Train a logistic regression model."""
+        # Avoid passing `multi_class` for compatibility with older scikit-learn
         self.model = LogisticRegression(
-            multi_class=kwargs.get("multi_class", "multinomial"),
             solver=kwargs.get("solver", "lbfgs"),
             max_iter=kwargs.get("max_iter", 1000),
             C=kwargs.get("C", 1.0),
