@@ -9,13 +9,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from typing import Tuple, Optional
 import os
+import glob
+from pathlib import Path
 
 
 class ObesityDatasetLoader:
     """Class to handle Obesity dataset loading and preprocessing"""
     
-    # Default path to the dataset
-    DEFAULT_PATH = r"D:\LocalGoogleDriveSync\MTech_BITS_PILANI_AI_ML\01_Semester_1\02_ML\00_Assignment\00_Assignment_2\Data\archive\ObesityDataSet_raw_and_data_sinthetic.csv"
+    # Default path to the dataset (relative path inside the repo)
+    DEFAULT_PATH = os.path.join("data", "ObesityDataSet_raw_and_data_sinthetic.csv")
     
     def __init__(self, file_path: str = None):
         """
@@ -42,18 +44,41 @@ class ObesityDatasetLoader:
         Returns:
             pd.DataFrame: Loaded dataset or None if error
         """
-        try:
-            self.df = pd.read_csv(self.file_path)
-            print(f"✓ Successfully loaded Obesity dataset")
-            print(f"  Shape: {self.df.shape[0]} rows, {self.df.shape[1]} columns")
-            print(f"  Columns: {list(self.df.columns)}")
-            return self.df
-        except FileNotFoundError:
-            print(f"✗ File not found: {self.file_path}")
-            return None
-        except Exception as e:
-            print(f"✗ Error loading file: {str(e)}")
-            return None
+        # If configured path exists, use it. Otherwise try to find a dataset in common locations.
+        tried_paths = []
+        candidates = [self.file_path]
+
+        # also try repo data/ folder and current working directory
+        basename = Path(self.file_path).name
+        candidates.append(os.path.join(os.getcwd(), basename))
+        candidates.append(os.path.join(os.getcwd(), "data", basename))
+
+        # search recursively for csv files with 'obesity' in the name
+        matches = glob.glob("**/*obesity*.csv", recursive=True)
+        matches += glob.glob("**/*Obesity*.csv", recursive=True)
+        for m in matches:
+            if m not in candidates:
+                candidates.append(m)
+
+        for p in candidates:
+            if p is None:
+                continue
+            tried_paths.append(p)
+            try:
+                if os.path.exists(p):
+                    self.df = pd.read_csv(p)
+                    self.file_path = p
+                    print(f"✓ Successfully loaded Obesity dataset from: {p}")
+                    print(f"  Shape: {self.df.shape[0]} rows, {self.df.shape[1]} columns")
+                    print(f"  Columns: {list(self.df.columns)}")
+                    return self.df
+            except Exception as e:
+                print(f"✗ Error loading file {p}: {e}")
+
+        # If we reached here, no file was found
+        print(f"✗ File not found. Tried paths:\n  {chr(10).join(tried_paths)}")
+        print("Place the dataset CSV in the repo (e.g. ./data/) or pass `file_path` to ObesityDatasetLoader.")
+        return None
     
     def get_data_info(self) -> dict:
         """Get information about the dataset"""
