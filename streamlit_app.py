@@ -425,14 +425,26 @@ elif page == "Model Validation":
     st.header("🧪 Model Validation & Comparison")
     st.write("Test and compare all 6 classification models on the same dataset")
     
-    # Load dataset
+    uploaded_file = st.file_uploader("Upload validation CSV (optional):", type=['csv'], key='validation_upload')
+    use_default = st.checkbox("Use default Obesity dataset (local path)", key='validation_use_default')
+
     loader = ObesityDatasetLoader()
-    df = loader.load_data()
-    
+    df = None
+
+    if uploaded_file is not None:
+        df = load_uploaded_df(uploaded_file)
+        if df is None:
+            st.error("❌ Could not read uploaded validation file")
+    elif use_default:
+        df = loader.load_data()
+        if df is None:
+            st.error("❌ Could not load default dataset. Please upload a CSV file.")
+
     if df is None:
-        st.error("❌ Could not load dataset")
+        st.info("ℹ️ Upload a CSV file or check the box to use default dataset")
     else:
         st.success("✅ Dataset loaded")
+        loader.df = df
         
         # Preprocess and split data
         with st.spinner("Preprocessing data..."):

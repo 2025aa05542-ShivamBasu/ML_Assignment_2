@@ -16,8 +16,8 @@ from pathlib import Path
 class ObesityDatasetLoader:
     """Class to handle Obesity dataset loading and preprocessing"""
     
-    # Default path to the dataset (relative path inside the repo)
-    DEFAULT_PATH = os.path.join("data", "ObesityDataSet_raw_and_data_sinthetic.csv")
+    # Default path to the dataset (absolute path inside the repo)
+    DEFAULT_PATH = str(Path(__file__).resolve().parent.parent / "data" / "ObesityDataSet_raw_and_data_sinthetic.csv")
     
     def __init__(self, file_path: str = None):
         """
